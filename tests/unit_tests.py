@@ -252,8 +252,6 @@ def test_all():
     test_delete()
 
 
-
-
 def main():
     global API_BASEURL
     test_name = None

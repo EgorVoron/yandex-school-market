@@ -20,4 +20,3 @@ engine.connect()
 Session = sessionmaker(bind=engine)
 session = Session()
 session._model_changes = {}
-
