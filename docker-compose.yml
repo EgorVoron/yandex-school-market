@@ -1,0 +1,22 @@
+version: '3.5'
+services:
+  database:
+    container_name: postgres
+    image: postgres:latest
+    env_file: database.conf
+    ports:
+      - 5432:5432
+    volumes:
+      - db_volume:/var/lib/postgresql
+    restart: always
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - /opt/code
+    ports:
+      - "80:80"
+    restart: always
+volumes:
+  db_volume:
