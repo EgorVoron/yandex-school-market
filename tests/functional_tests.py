@@ -214,7 +214,7 @@ def test_twice_put_delete():
                         "parentId": "subroot2.1",
                         "price": 3,
                         "date": "2022-05-28T22:12:01.000Z",
-                        "children": None
+                        "children": None,
                     }
                 ],
             },
@@ -305,10 +305,48 @@ def test_twice_put_delete():
     print("Test twice put delete passed.")
 
 
+def test_time_segments():
+    def get_item_data(id: str, day: int, hour: int):
+        return {
+            "updateDate": f"2022-01-0{day}T0{hour}:00:00.000Z",
+            "items": [
+                {
+                    "id": id,
+                    "name": id,
+                    "type": "OFFER",
+                    "parentId": None,
+                    "price": 1,
+                }
+            ],
+        }
+
+    status, _ = request("/imports", "POST", data=get_item_data("1", 2, 0))
+    status, _ = request("/imports", "POST", data=get_item_data("1", 2, 1))
+    status, _ = request("/imports", "POST", data=get_item_data("2", 2, 1))
+    status, _ = request("/imports", "POST", data=get_item_data("2", 2, 2))
+    status, _ = request("/imports", "POST", data=get_item_data("3", 1, 3))
+    status, _ = request("/imports", "POST", data=get_item_data("3", 1, 4))
+    status, _ = request("/imports", "POST", data=get_item_data("4", 2, 5))
+
+    status, updated_items = request("/sales?date=2022-01-03T00:00:00.000Z", "GET", json_response=True)
+
+    expected_items = [{'date': 'Sun, 02 Jan 2022 01:00:00 GMT', 'id': '1', 'name': '1', 'parentId': None, 'price': 1,
+                       'type': 'OFFER'},
+                      {'date': 'Sun, 02 Jan 2022 02:00:00 GMT', 'id': '2', 'name': '2', 'parentId': None, 'price': 1,
+                       'type': 'OFFER'}]
+
+    print(updated_items)
+    request("/delete/1", "DELETE")
+    request("/delete/2", "DELETE")
+    request("/delete/3", "DELETE")
+    request("/delete/4", "DELETE")
+
+
 def test_all():
     test_scenario_atomicity()
     test_scenario_parents_remove()
     test_twice_put_delete()
+    test_time_segments()
 
 
 if __name__ == "__main__":

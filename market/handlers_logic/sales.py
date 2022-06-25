@@ -3,7 +3,7 @@ from typing import List
 
 from market.db.schema import PriceUpdateLog, ShopUnit
 from market.db.sql_session import session
-
+from market.utils import datetime_to_iso
 
 def get_price_updated_units_tuples(date_to: datetime) -> List[tuple]:
     date_from = date_to - timedelta(hours=24)
@@ -33,7 +33,7 @@ def get_price_updated_units(date_to: datetime) -> List[dict]:
             "parentId": unit_tuple[2],
             "type": unit_tuple[3],
             "price": unit_tuple[4],
-            "date": unit_tuple[5],
+            "date": datetime_to_iso(unit_tuple[5]),
         }
         updated_units_dicts.append(unit)
     return updated_units_dicts
