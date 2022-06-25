@@ -17,6 +17,7 @@ not_found_response = {"code": 404, "message": "Item not found"}, 404
 
 def imports():
     if not isinstance(request.json, dict):
+        print('not dict')
         return validation_failed_response
     items: List[Dict[str, Any]] = request.json.get("items")
     update_date = iso_to_datetime(request.json.get("updateDate"))

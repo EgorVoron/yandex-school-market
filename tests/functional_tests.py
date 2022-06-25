@@ -3,7 +3,7 @@ from tests.test_utils import request
 
 def test_scenario_atomicity():
     status, _ = request("/imports", "POST", data={
-        "updateDate": "2022-05-28T21:12:01.000Z",
+        "updateDate": "2022-02-01T12:00:00.000Z",
         "items": [
             {
                 "id": "offer1",

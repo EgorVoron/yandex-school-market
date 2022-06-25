@@ -103,6 +103,7 @@ def post_shop_unit(item: item_t, update_date: datetime) -> bool:
     )
     if inserted_unit:
         if inserted_unit.type != item["type"]:
+            print('failed type comparison')
             return False
         update_shop_unit(item, update_date)
     else:
