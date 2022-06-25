@@ -1,10 +1,13 @@
-from pprint import pprint
 from typing import Any, Dict, List
 
 from flask import jsonify, request
 
-from market.handlers_logic import (get_units_subtree, post_shop_units,
-                                   remove_unit)
+from market.handlers_logic import (
+    get_price_updated_units,
+    get_units_subtree,
+    post_shop_units,
+    remove_unit,
+)
 from market.utils import iso_to_datetime, unit_exists
 
 validation_failed_response = {"code": 400, "message": "Validation Failed"}, 400
@@ -31,6 +34,13 @@ def delete(id):
 def nodes(id):
     if not unit_exists(id):
         return not_found_response
-    result = get_units_subtree(id)
-    pprint(result)
+    result: dict = get_units_subtree(id)
+    return jsonify(result), 200
+
+
+def sales():
+    date_to = iso_to_datetime(request.args.get("date"))
+    if not date_to:
+        return validation_failed_response
+    result: List[dict] = get_price_updated_units(date_to)
     return jsonify(result), 200

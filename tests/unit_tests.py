@@ -1,12 +1,118 @@
-import json
 import re
-import subprocess
 import sys
 import urllib.error
 import urllib.parse
 import urllib.request
 
-API_BASEURL = "https://bali-1898.usr.yandex-academy.ru"
+from tests.test_utils import API_BASEURL, deep_sort_children, print_diff, request
+
+
+def test_check_fields():
+    status, _ = request(
+        "/imports",
+        method="POST",
+        data={
+            "updateDate": "2022-02-03T15:00:00.000Z",
+            "items": [{"type": "OFFER", "id": "b"}],
+        },
+    )
+    assert status == 400
+
+
+def test_check_name():
+    status, _ = request(
+        "/imports",
+        method="POST",
+        data={
+            "updateDate": "2022-02-03T15:00:00.000Z",
+            "items": [{"type": "OFFER", "id": "b", "name": None}],
+        },
+    )
+    assert status == 400
+
+
+def test_check_price_1():
+    status, _ = request(
+        "/imports",
+        method="POST",
+        data={
+            "updateDate": "2022-02-03T15:00:00.000Z",
+            "items": [{"type": "OFFER", "id": "b", "name": "a", "price": None}],
+        },
+    )
+    assert status == 400
+
+
+def test_check_price_2():
+    status, _ = request(
+        "/imports",
+        method="POST",
+        data={
+            "updateDate": "2022-02-03T15:00:00.000Z",
+            "items": [{"type": "OFFER", "id": "b", "name": "a", "price": -2}],
+        },
+    )
+    assert status == 400
+
+
+def test_check_price_3():
+    status, _ = request(
+        "/imports",
+        method="POST",
+        data={
+            "updateDate": "2022-02-03T15:00:00.000Z",
+            "items": [{"type": "CATEGORY", "id": "b", "name": "a", "price": 3}],
+        },
+    )
+    assert status == 400
+
+
+def test_check_time():
+    status, _ = request(
+        "/imports",
+        method="POST",
+        data={
+            "updateDate": "2022-02-03 15:00:00.000",
+            "items": [{"type": "CATEGORY", "id": "b", "name": "a", "price": None}],
+        },
+    )
+    assert status == 400
+
+
+def test_check_id():
+    status, _ = request(
+        "/imports",
+        method="POST",
+        data={
+            "updateDate": "2022-02-03T15:00:00.000Z",
+            "items": [
+                {"type": "CATEGORY", "id": "b", "name": "a", "price": None},
+                {"type": "CATEGORY", "id": "b", "name": "a", "price": None},
+            ],
+        },
+    )
+    assert status == 400
+
+
+def test_post():
+    for index, batch in enumerate(IMPORT_BATCHES):
+        status, _ = request("/imports", method="POST", data=batch)
+
+        assert status == 200, f"Expected HTTP status code 200, got {status}"
+
+
+def test_imports():
+    test_check_fields()
+    test_check_name()
+    test_check_price_1()
+    test_check_price_2()
+    test_check_price_3()
+    test_check_time()
+    test_check_id()
+    print("Test imports checks & validations passed.")
+    test_post()
+    print("Test imports passed.")
+
 
 ROOT_ID = "069cb8d7-bbdd-47d3-ad8f-82ef4c269df1"
 
@@ -163,65 +269,8 @@ EXPECTED_TREE = {
 }
 
 
-def request(path, method="GET", data=None, json_response=False):
-    try:
-        params = {
-            "url": f"{API_BASEURL}{path}",
-            "method": method,
-            "headers": {},
-        }
-
-        if data:
-            params["data"] = json.dumps(data, ensure_ascii=False).encode("utf-8")
-            params["headers"]["Content-Length"] = len(params["data"])
-            params["headers"]["Content-Type"] = "application/json"
-
-        req = urllib.request.Request(**params)
-
-        with urllib.request.urlopen(req) as res:
-            res_data = res.read().decode("utf-8")
-            if json_response:
-                res_data = json.loads(res_data)
-            return (res.getcode(), res_data)
-    except urllib.error.HTTPError as e:
-        return (e.getcode(), None)
-
-
-def deep_sort_children(node):
-    if node.get("children"):
-        node["children"].sort(key=lambda x: x["id"])
-
-        for child in node["children"]:
-            deep_sort_children(child)
-
-
-def print_diff(expected, response):
-    with open("expected.json", "w") as f:
-        json.dump(expected, f, indent=2, ensure_ascii=False, sort_keys=True)
-        f.write("\n")
-
-    with open("response.json", "w") as f:
-        json.dump(response, f, indent=2, ensure_ascii=False, sort_keys=True)
-        f.write("\n")
-
-    subprocess.run(
-        ["git", "--no-pager", "diff", "--no-index", "expected.json", "response.json"]
-    )
-
-
-def test_import():
-    for index, batch in enumerate(IMPORT_BATCHES):
-        print(f"Importing batch {index}")
-        status, _ = request("/imports", method="POST", data=batch)
-
-        assert status == 200, f"Expected HTTP status code 200, got {status}"
-
-    print("Test import passed.")
-
-
 def test_nodes():
     status, response = request(f"/nodes/{ROOT_ID}", json_response=True)
-    # print(json.dumps(response, indent=2, ensure_ascii=False))
 
     assert status == 200, f"Expected HTTP status code 200, got {status}"
 
@@ -245,13 +294,18 @@ def test_delete():
     print("Test delete passed.")
 
 
+def test_sales():
+    params = urllib.parse.urlencode({"date": "2022-02-04T00:00:00.000Z"})
+    status, response = request(f"/sales?{params}", json_response=True)
+    assert status == 200, f"Expected HTTP status code 200, got {status}"
+    print("Test sales passed.")
+
+
 def test_all():
-    test_import()
+    test_imports()
     test_nodes()
-
     test_delete()
-
-
+    test_sales()
 
 
 def main():
