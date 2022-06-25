@@ -4,8 +4,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
-from tests.test_utils import (API_BASEURL, deep_sort_children, print_diff,
-                              request)
+from tests.test_utils import API_BASEURL, deep_sort_children, print_diff, request
 
 
 def test_check_fields():
