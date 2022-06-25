@@ -1,6 +1,6 @@
 from typing import List
 
-from market.db.schema import ShopUnit
+from market.db.schema import ShopUnit, PriceUpdateLog
 from market.db.sql_session import session
 
 
@@ -28,4 +28,7 @@ def get_subtree(unit_id: str) -> List[str]:
 def remove_unit(unit_id: str) -> None:
     subtree_indices = get_subtree(unit_id)
     session.query(ShopUnit).where(ShopUnit.unit_id.in_(subtree_indices)).delete()
+    session.query(PriceUpdateLog).where(
+        PriceUpdateLog.unit_id.in_(subtree_indices)
+    ).delete()
     session.commit()
