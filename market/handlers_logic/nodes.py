@@ -96,7 +96,7 @@ def get_units_tuple_from_subtree(unit_id: str) -> List[tuple]:
     return units_tuples
 
 
-def build_dict_from_units(units_tuples: List[tuple]) -> List[dict]:
+def build_dict_from_units(units_tuples: List[tuple], unit_id: str) -> dict:
     units_dicts = [
         {
             "id": u[0],
@@ -121,9 +121,9 @@ def build_dict_from_units(units_tuples: List[tuple]) -> List[dict]:
             level2units[unit["level"]] = [unit]
         unit.pop("level")
 
-    for level in range(max(level2units.keys()), -1, -1):
+    for level in range(max(level2units.keys()), min(level2units.keys()), -1):
         for unit in level2units[level]:
-            if not unit["parentId"]:
+            if not unit["parentId"] or unit["parentId"] not in id2unit.keys():
                 continue
             parent = id2unit[unit["parentId"]]
             parent["date"] = max(parent["date"], unit["date"])
@@ -133,10 +133,10 @@ def build_dict_from_units(units_tuples: List[tuple]) -> List[dict]:
             if units_dicts[j]["parentId"] == units_dicts[i]["id"]:
                 units_dicts[i]["children"].append(units_dicts[j])
 
-    return [unit for unit in units_dicts if unit["parentId"] is None]
+    return [unit for unit in units_dicts if unit["id"] == unit_id][0]
 
 
 def get_units_subtree(unit_id: str) -> dict:
     units_tuples = get_units_tuple_from_subtree(unit_id)
-    result = build_dict_from_units(units_tuples)
-    return result[0]
+    result = build_dict_from_units(units_tuples, unit_id)
+    return result

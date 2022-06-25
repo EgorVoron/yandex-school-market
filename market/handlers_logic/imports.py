@@ -37,8 +37,8 @@ def validate_item(item: item_t) -> bool:
     return True
 
 
-def check_items_id_list(id2item: Dict[str, dict]) -> bool:
-    return len(set(id2item.keys())) == len(id2item)
+def check_items_id_list(id_list: List[str]) -> bool:
+    return len(set(id_list)) == len(id_list)
 
 
 def check_items_parents(items: List[item_t], id2item: Dict[str, dict]) -> bool:
@@ -65,7 +65,8 @@ def validate_items(items: List[item_t]) -> bool:
         if not validate_item(item):
             return False
     id2item: Dict[str, dict] = {item["id"]: item for item in items}
-    if not check_items_id_list(id2item):
+    id_list = [item["id"] for item in items]
+    if not check_items_id_list(id_list):
         return False
     if not check_items_parents(items, id2item):
         print("failed parents check")
