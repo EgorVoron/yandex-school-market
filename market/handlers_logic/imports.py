@@ -47,6 +47,7 @@ checkers: List[Callable] = [check_fields, check_name, check_price, check_parent]
 def validate_shop_unit(item: item_t) -> bool:
     for checker in checkers:
         if not checker(item):
+            print(f'failed {checker.__name__}')
             return False
     return True
 
@@ -119,6 +120,7 @@ def validate_items_id_list(items: List[item_t]) -> bool:
 
 def post_shop_units(items: List[item_t], update_date: datetime) -> bool:
     if not validate_items_id_list(items):
+        print('failed validate_items_id_list')
         return False
     for item in items:
         result: bool = post_shop_unit(item, update_date)
