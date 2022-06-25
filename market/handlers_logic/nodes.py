@@ -10,6 +10,10 @@ from market.utils import datetime_to_iso
 
 
 def get_units_tuple_from_subtree(unit_id: str) -> List[tuple]:
+    """
+    Gets tuples of nodes from subtree with updated average price
+    Tuples look like this: (unit_id, name, parent_id, type, price, date, level)
+    """
     local_root_query = (
         session.query(ShopUnit)
         .filter(ShopUnit.unit_id == unit_id)
@@ -97,6 +101,9 @@ def get_units_tuple_from_subtree(unit_id: str) -> List[tuple]:
 
 
 def build_dict_from_units(units_tuples: List[tuple], unit_id: str) -> dict:
+    """
+    Builds nested dict from nodes
+    """
     units_dicts = [
         {
             "id": u[0],
@@ -137,6 +144,9 @@ def build_dict_from_units(units_tuples: List[tuple], unit_id: str) -> dict:
 
 
 def get_units_subtree(unit_id: str) -> dict:
+    """
+    Returns dict with nested structure of subtree if unit
+    """
     units_tuples = get_units_tuple_from_subtree(unit_id)
     result = build_dict_from_units(units_tuples, unit_id)
     return result

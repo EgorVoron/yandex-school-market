@@ -6,10 +6,16 @@ from market.handlers_logic.nodes import get_units_subtree
 
 
 def get_update_time(unit_id: str):
+    """
+    Counts last update time of node. Will be used to update 'date' field of parent of deleted node
+    """
     return get_units_subtree(unit_id)["date"]
 
 
 def get_subtree(unit_id: str) -> List[str]:
+    """
+    Returns indices of nodes to remove
+    """
     local_root_query = (
         session.query(ShopUnit)
         .filter(ShopUnit.unit_id == unit_id)
@@ -27,6 +33,9 @@ def get_subtree(unit_id: str) -> List[str]:
 
 
 def remove_unit(unit_id: str) -> None:
+    """
+    Deletes subtree, updates 'date' of deleted node's parent and deletes price updates logs of nodes from subtree
+    """
     subtree_indices = get_subtree(unit_id)
 
     unit = session.query(ShopUnit).where(ShopUnit.unit_id == unit_id).first()

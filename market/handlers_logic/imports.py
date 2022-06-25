@@ -11,6 +11,9 @@ item_t = Dict[str, Any]
 
 
 def check_item_fields(item: item_t) -> bool:
+    """
+    Checks required fields presence and format
+    """
     for field in required_fields:
         if not item.get(field):
             return False
@@ -18,6 +21,9 @@ def check_item_fields(item: item_t) -> bool:
 
 
 def check_item_price(item: item_t) -> bool:
+    """
+    Checks if price value is correct
+    """
     if "price" not in item.keys():
         return True
     if item["type"] == "CATEGORY":
@@ -30,6 +36,9 @@ item_checkers: List[Callable] = [check_item_fields, check_item_price]
 
 
 def validate_item(item: item_t) -> bool:
+    """
+    Validates item's fields
+    """
     for checker in item_checkers:
         if not checker(item):
             return False
@@ -37,10 +46,18 @@ def validate_item(item: item_t) -> bool:
 
 
 def check_items_id_list(id_list: List[str]) -> bool:
+    """
+    Checks if there are items with the same id
+    """
     return len(set(id_list)) == len(id_list)
 
 
 def check_items_parents(items: List[item_t], id2item: Dict[str, dict]) -> bool:
+    """
+    Checks if item's parent's type is CATEGORY
+    :param items: list of all items
+    :param id2item: {id: item}
+    """
     for item in items:
         if not item.get("parentId"):
             continue
@@ -58,6 +75,9 @@ def check_items_parents(items: List[item_t], id2item: Dict[str, dict]) -> bool:
 
 
 def validate_items(items: List[item_t]) -> bool:
+    """
+    Checks if there are incorrect items in input
+    """
     if not items:
         return False
     for item in items:
@@ -73,6 +93,11 @@ def validate_items(items: List[item_t]) -> bool:
 
 
 def count_level(item: item_t) -> int:
+    """
+    Counts level of the new node. If I had more time, I would implement something like "update_levels" from levels.py,
+    since there can be a situation, where node's level is changed because of it's ancestors changes. Current
+    implementation is naive and supposes that node's levels stay constant.
+    """
     parent_id = item.get("parentId")
     level = 0
     if parent_id:
@@ -84,6 +109,9 @@ def count_level(item: item_t) -> int:
 
 
 def update_shop_unit(item: item_t, update_date: datetime) -> None:
+    """
+    Updates unit's fields in DB, if unit already exists
+    """
     session.query(ShopUnit).filter(ShopUnit.unit_id == item["id"]).update(
         {
             ShopUnit.name: item["name"],
@@ -101,6 +129,9 @@ def update_shop_unit(item: item_t, update_date: datetime) -> None:
 
 
 def create_shop_unit(item: item_t, update_date: datetime) -> None:
+    """
+    Creates unit from item's fields
+    """
     shop_unit = ShopUnit(
         unit_id=item["id"],
         name=item["name"],
@@ -127,6 +158,10 @@ def post_shop_unit(item: item_t, update_date: datetime) -> bool:
 
 
 def post_shop_units(items: List[item_t], update_date: datetime) -> bool:
+    """
+    Posts (creates or updates) all units and returns True, if they're correct,
+    in other case returns False
+    """
     if not validate_items(items):
         return False
     for item in items:

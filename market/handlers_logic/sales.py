@@ -7,6 +7,10 @@ from market.utils import datetime_to_iso
 
 
 def get_price_updated_units_tuples(date_to: datetime) -> List[tuple]:
+    """
+    Returns tuples of units (offers), updated between date_from and date_to
+    Tuples look like this: (unit_id, name, parent_id, type, price, date)
+    """
     date_from = date_to - timedelta(hours=24)
     return (
         session.query(PriceUpdateLog)
@@ -25,6 +29,9 @@ def get_price_updated_units_tuples(date_to: datetime) -> List[tuple]:
 
 
 def get_price_updated_units(date_to: datetime) -> List[dict]:
+    """
+    Returns formatted dicts with updated units
+    """
     units_tuples = get_price_updated_units_tuples(date_to)
     updated_units_dicts = []
     for unit_tuple in units_tuples:

@@ -7,6 +7,8 @@ from market.db.sql_session import engine
 Base.metadata.create_all(engine)
 app = Flask(__name__)
 
+# I've decided to use add_url_rule() instead of decorators in order to
+# easily split creating app and declarations of routes from routes' implementations
 app.add_url_rule("/imports", methods=["POST"], view_func=views.imports)
 app.add_url_rule("/delete/<id>", methods=["DELETE"], view_func=views.delete)
 app.add_url_rule("/nodes/<id>", methods=["GET"], view_func=views.nodes)

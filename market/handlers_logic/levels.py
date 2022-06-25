@@ -4,7 +4,10 @@ from market.db.schema import PriceUpdateLog, ShopUnit
 from market.db.sql_session import session
 
 
-def get_updated_levels():
+def update_levels():
+    """
+    Unfinished function for levels updating
+    """
     roots_query = (
         session.query(ShopUnit)
         .with_entities(
@@ -25,5 +28,4 @@ def get_updated_levels():
             roots_query.c.level + 1,
         )
     )
-    level_query = roots_query.union(levels_sum_query)
-    return level_query
+    ...
