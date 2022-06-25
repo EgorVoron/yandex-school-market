@@ -1,5 +1,6 @@
-from tests.test_utils import request, deep_sort_children, print_diff
 import sys
+
+from tests.test_utils import deep_sort_children, print_diff, request
 
 
 def test_scenario_atomicity():
@@ -350,7 +351,9 @@ def test_time_segments():
             "type": "OFFER",
         },
     ]
-    assert sorted(expected_items, key=lambda x: x.items()) == sorted(updated_items, key=lambda x: x.items())
+    assert sorted(expected_items, key=lambda x: x.items()) == sorted(
+        updated_items, key=lambda x: x.items()
+    )
 
     request("/delete/1", "DELETE")
 
@@ -369,7 +372,9 @@ def test_time_segments():
         }
     ]
 
-    assert sorted(expected_items, key=lambda x: x.items()) == sorted(updated_items, key=lambda x: x.items())
+    assert sorted(expected_items, key=lambda x: x.items()) == sorted(
+        updated_items, key=lambda x: x.items()
+    )
 
     request("/delete/2", "DELETE")
     request("/delete/3", "DELETE")

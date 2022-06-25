@@ -1,11 +1,11 @@
 from flask import Flask
 
 import market.views as views
-from market.db.schema import Base, ShopUnit, PriceUpdateLog
+from market.db.schema import Base, PriceUpdateLog, ShopUnit
 from market.db.sql_session import engine
 
-#ShopUnit.__table__.drop(engine)  # upd
-#PriceUpdateLog.__table__.drop(engine)  # upd
+# ShopUnit.__table__.drop(engine)  # upd
+# PriceUpdateLog.__table__.drop(engine)  # upd
 
 Base.metadata.create_all(engine)
 app = Flask(__name__)

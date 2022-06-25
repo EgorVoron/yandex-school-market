@@ -2,12 +2,8 @@ from typing import Any, Dict, List
 
 from flask import jsonify, request
 
-from market.handlers_logic import (
-    get_price_updated_units,
-    get_units_subtree,
-    post_shop_units,
-    remove_unit,
-)
+from market.handlers_logic import (get_price_updated_units, get_units_subtree,
+                                   post_shop_units, remove_unit)
 from market.utils import iso_to_datetime, unit_exists
 
 validation_failed_response = {"code": 400, "message": "Validation Failed"}, 400

@@ -93,7 +93,7 @@ def update_shop_unit(item: item_t, update_date: datetime) -> None:
             ShopUnit.type: item["type"],
             ShopUnit.price: item.get("price"),
             ShopUnit.date: update_date,
-            ShopUnit.level: count_level(item)
+            ShopUnit.level: count_level(item),
         }
     )
     if "price" not in item.keys():

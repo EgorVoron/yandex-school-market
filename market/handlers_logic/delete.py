@@ -12,15 +12,16 @@ def get_update_time(unit_id: str):
 def get_subtree(unit_id: str) -> List[str]:
     local_root_query = (
         session.query(ShopUnit)
-            .filter(ShopUnit.unit_id == unit_id)
-            .cte("cte", recursive=True)
+        .filter(ShopUnit.unit_id == unit_id)
+        .cte("cte", recursive=True)
     )
     bottom_subtree_query = session.query(ShopUnit).join(
         local_root_query, ShopUnit.parent_id == local_root_query.c.unit_id
     )
     dfs_query = local_root_query.union(bottom_subtree_query)
     subtree_indices = [
-        obj[0] for obj in session.query(dfs_query).with_entities(dfs_query.c.unit_id).all()
+        obj[0]
+        for obj in session.query(dfs_query).with_entities(dfs_query.c.unit_id).all()
     ]
     return subtree_indices
 
@@ -34,7 +35,8 @@ def remove_unit(unit_id: str) -> None:
     session.query(ShopUnit).where(ShopUnit.unit_id == parent_id).update(
         {
             ShopUnit.date: get_update_time(unit_id),
-        })
+        }
+    )
     session.commit()
 
     session.query(ShopUnit).where(ShopUnit.unit_id.in_(subtree_indices)).delete()

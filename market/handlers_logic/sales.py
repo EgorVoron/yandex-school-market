@@ -5,6 +5,7 @@ from market.db.schema import PriceUpdateLog, ShopUnit
 from market.db.sql_session import session
 from market.utils import datetime_to_iso
 
+
 def get_price_updated_units_tuples(date_to: datetime) -> List[tuple]:
     date_from = date_to - timedelta(hours=24)
     return (

@@ -4,6 +4,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 from typing import Any
+
 API_BASEURL = "https://bali-1898.usr.yandex-academy.ru"  # upd
 
 """
