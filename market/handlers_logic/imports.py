@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Any, Callable, Dict, List
 
-from market.db.schema import ShopUnit, PriceUpdateLog
+from market.db.schema import PriceUpdateLog, ShopUnit
 from market.db.sql_session import session
 
 required_fields = ["id", "name", "type"]
@@ -74,10 +74,7 @@ def update_shop_unit(item: item_t, update_date: datetime) -> None:
     )
     if "price" not in item.keys():
         return
-    price_update_log = PriceUpdateLog(
-        unit_id=item["id"],
-        date=update_date
-    )
+    price_update_log = PriceUpdateLog(unit_id=item["id"], date=update_date)
     session.add(price_update_log)
 
 

@@ -2,8 +2,12 @@ from typing import Any, Dict, List
 
 from flask import jsonify, request
 
-from market.handlers_logic import (get_units_subtree, post_shop_units,
-                                   remove_unit, get_price_updated_units)
+from market.handlers_logic import (
+    get_price_updated_units,
+    get_units_subtree,
+    post_shop_units,
+    remove_unit,
+)
 from market.utils import iso_to_datetime, unit_exists
 
 validation_failed_response = {"code": 400, "message": "Validation Failed"}, 400
@@ -12,6 +16,8 @@ not_found_response = {"code": 404, "message": "Item not found"}, 404
 
 
 def imports():
+    if not isinstance(request.json, dict):
+        return validation_failed_response
     items: List[Dict[str, Any]] = request.json.get("items")
     update_date = iso_to_datetime(request.json.get("updateDate"))
     if not update_date:

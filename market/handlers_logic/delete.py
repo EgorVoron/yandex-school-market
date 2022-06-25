@@ -1,6 +1,6 @@
 from typing import List
 
-from market.db.schema import ShopUnit, PriceUpdateLog
+from market.db.schema import PriceUpdateLog, ShopUnit
 from market.db.sql_session import session
 
 
