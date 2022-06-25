@@ -10,18 +10,14 @@ type_values = ["CATEGORY", "OFFER"]
 item_t = Dict[str, Any]
 
 
-def check_fields(item: item_t) -> bool:
+def check_item_fields(item: item_t) -> bool:
     for field in required_fields:
         if not item.get(field):
             return False
     return item["type"] in type_values
 
 
-def check_name(item: item_t) -> bool:
-    return item["name"] is not None
-
-
-def check_price(item: item_t) -> bool:
+def check_item_price(item: item_t) -> bool:
     if "price" not in item.keys():
         return True
     if item["type"] == "CATEGORY":
@@ -30,25 +26,50 @@ def check_price(item: item_t) -> bool:
         return isinstance(item["price"], int) and item["price"] >= 0
 
 
-def check_parent(item: item_t) -> bool:
-    if not item.get("parentId"):
-        return True
-    parent_unit = (
-        session.query(ShopUnit).filter(ShopUnit.unit_id == item["parentId"]).first()
-    )
-    if not parent_unit:
-        return False
-    return parent_unit.type == "CATEGORY"
+item_checkers: List[Callable] = [check_item_fields, check_item_price]
 
 
-checkers: List[Callable] = [check_fields, check_name, check_price, check_parent]
-
-
-def validate_shop_unit(item: item_t) -> bool:
-    for checker in checkers:
+def validate_item(item: item_t) -> bool:
+    for checker in item_checkers:
         if not checker(item):
-            print(f'failed {checker.__name__}')
+            print(f"failed {checker.__name__}")
             return False
+    return True
+
+
+def check_items_id_list(id2item: Dict[str, dict]) -> bool:
+    return len(set(id2item.keys())) == len(id2item)
+
+
+def check_items_parents(items: List[item_t], id2item: Dict[str, dict]) -> bool:
+    for item in items:
+        if not item.get("parentId"):
+            continue
+        if item["parentId"] in id2item.keys():
+            return id2item[item["parentId"]]["type"] == "CATEGORY"
+
+        parent_unit = (
+            session.query(ShopUnit).filter(ShopUnit.unit_id == item["parentId"]).first()
+        )
+        if not parent_unit:
+            return False
+        if parent_unit.type != "CATEGORY":
+            return False
+    return True
+
+
+def validate_items(items: List[item_t]) -> bool:
+    if not items:
+        return False
+    for item in items:
+        if not validate_item(item):
+            return False
+    id2item: Dict[str, dict] = {item["id"]: item for item in items}
+    if not check_items_id_list(id2item):
+        return False
+    if not check_items_parents(items, id2item):
+        print("failed parents check")
+        return False
     return True
 
 
@@ -71,6 +92,7 @@ def update_shop_unit(item: item_t, update_date: datetime) -> None:
             ShopUnit.type: item["type"],
             ShopUnit.price: item.get("price"),
             ShopUnit.date: update_date,
+            ShopUnit.level: count_level(item)
         }
     )
     if "price" not in item.keys():
@@ -80,8 +102,6 @@ def update_shop_unit(item: item_t, update_date: datetime) -> None:
 
 
 def create_shop_unit(item: item_t, update_date: datetime) -> None:
-    level = count_level(item)
-
     shop_unit = ShopUnit(
         unit_id=item["id"],
         name=item["name"],
@@ -89,39 +109,27 @@ def create_shop_unit(item: item_t, update_date: datetime) -> None:
         type=item["type"],
         price=item.get("price"),
         date=update_date,
-        level=level,
+        level=count_level(item),
     )
     session.add(shop_unit)
 
 
 def post_shop_unit(item: item_t, update_date: datetime) -> bool:
-    if not validate_shop_unit(item):
-        return False
-
     inserted_unit = (
         session.query(ShopUnit).filter(ShopUnit.unit_id == item["id"]).first()
     )
     if inserted_unit:
         if inserted_unit.type != item["type"]:
-            print('failed type comparison')
+            print("failed type comparison")
             return False
         update_shop_unit(item, update_date)
     else:
         create_shop_unit(item, update_date)
-
     return True
 
 
-def validate_items_id_list(items: List[item_t]) -> bool:
-    if not items:
-        return False
-    id_list = [item["id"] for item in items]
-    return len(set(id_list)) == len(id_list)
-
-
 def post_shop_units(items: List[item_t], update_date: datetime) -> bool:
-    if not validate_items_id_list(items):
-        print('failed validate_items_id_list')
+    if not validate_items(items):
         return False
     for item in items:
         result: bool = post_shop_unit(item, update_date)

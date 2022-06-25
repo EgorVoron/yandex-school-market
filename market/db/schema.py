@@ -1,4 +1,4 @@
-from sqlalchemy import Column, DateTime, Integer, String
+from sqlalchemy import Column, DateTime, Integer, String, PrimaryKeyConstraint
 from sqlalchemy.orm import declarative_base
 
 Base = declarative_base()
@@ -22,5 +22,9 @@ class ShopUnit(Base):
 class PriceUpdateLog(Base):
     __tablename__ = "PriceUpdateLog"
 
-    unit_id = Column(String, primary_key=True)
+    unit_id = Column(String)
     date = Column(DateTime)
+    __table_args__ = (
+        PrimaryKeyConstraint(unit_id, date),
+        {},
+    )

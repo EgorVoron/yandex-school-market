@@ -101,7 +101,6 @@ def test_post():
 
         assert status == 200, f"Expected HTTP status code 200, got {status}"
 
-    print("Test import passed.")
 
 
 def test_imports():
@@ -113,6 +112,8 @@ def test_imports():
     test_check_time()
     test_check_id()
     test_post()
+    print("Test imports passed.")
+
 
 
 ROOT_ID = "069cb8d7-bbdd-47d3-ad8f-82ef4c269df1"
