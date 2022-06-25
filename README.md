@@ -41,7 +41,7 @@
 Схема БД
 ----------------------
 
-![](C:\Users\79161\PycharmProjects\yandex-school-market\db_relations.png)
+![](db_relations.png)
 
 **ShopUnit**  
 товары и категории
