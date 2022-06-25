@@ -1,4 +1,3 @@
-from pprint import pprint
 from typing import Any, Dict, List
 
 from flask import jsonify, request
@@ -31,6 +30,5 @@ def delete(id):
 def nodes(id):
     if not unit_exists(id):
         return not_found_response
-    result = get_units_subtree(id)
-    pprint(result)
+    result: dict = get_units_subtree(id)
     return jsonify(result), 200

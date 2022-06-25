@@ -136,9 +136,7 @@ def build_dict_from_units(units_tuples: List[tuple]) -> List[dict]:
     return [unit for unit in units_dicts if unit["parentId"] is None]
 
 
-def get_units_subtree(unit_id: str) -> Union[dict, List[dict]]:
+def get_units_subtree(unit_id: str) -> dict:
     units_tuples = get_units_tuple_from_subtree(unit_id)
-    result_dict = build_dict_from_units(units_tuples)
-    if len(result_dict) == 1:
-        return result_dict[0]
-    return result_dict
+    result = build_dict_from_units(units_tuples)
+    return result[0]
