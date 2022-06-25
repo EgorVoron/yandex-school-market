@@ -1,4 +1,4 @@
-from typing import List, Union
+from typing import List
 
 from sqlalchemy import Integer, cast, except_
 from sqlalchemy.sql import func
