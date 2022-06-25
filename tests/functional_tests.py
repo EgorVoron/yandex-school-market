@@ -27,14 +27,14 @@ def test_scenario_atomicity():
             ],
         },
     )
-    assert status == 400
+    assert status == 400, f"Expected HTTP status code 404, got {status}"
     status, result = request("/nodes/offer1", "GET")
-    assert status == 404
+    assert status == 404, f"Expected HTTP status code 404, got {status}"
     status, result = request("/nodes/offer2", "GET")
-    assert status == 404
+    assert status == 404, f"Expected HTTP status code 404, got {status}"
     status, result = request("/nodes/offer3", "GET")
-    assert status == 404
-    print("Atomicity test passed")
+    assert status == 404, f"Expected HTTP status code 404, got {status}"
+    print("Test atomicity passed")
 
 
 def test_scenario_parents_remove():
@@ -76,18 +76,18 @@ def test_scenario_parents_remove():
         },
     )
 
-    assert status == 200
+    assert status == 200, f"Expected HTTP status code 200, got {status}"
 
     status, _ = request("/delete/root1", "DELETE")
-    assert status == 200
+    assert status == 200, f"Expected HTTP status code 200, got {status}"
 
     status, _ = request("/delete/root2", "DELETE")
-    assert status == 200
+    assert status == 200, f"Expected HTTP status code 200, got {status}"
 
     status, _ = request("/nodes/root2", "GET")
-    assert status == 404
+    assert status == 404, f"Expected HTTP status code 404, got {status}"
 
-    print("Parents remove test passed")
+    print("Test parents remove passed")
 
 
 def test_twice_put_delete():
@@ -107,7 +107,7 @@ def test_twice_put_delete():
             ],
         },
     )
-    assert status == 200
+    assert status == 200, f"Expected HTTP status code 200, got {status}"
 
     status, _ = request(
         "/imports",
@@ -161,7 +161,7 @@ def test_twice_put_delete():
         },
     )
 
-    assert status == 200
+    assert status == 200, f"Expected HTTP status code 200, got {status}"
 
     status, _ = request(
         "/imports",
@@ -246,10 +246,10 @@ def test_twice_put_delete():
         sys.exit(1)
 
     status, _ = request("/delete/subroot2.1", "DELETE")
-    assert status == 200
+    assert status == 200, f"Expected HTTP status code 200, got {status}"
 
     status, tree = request("/nodes/root2", "GET", json_response=True)
-    assert status == 200
+    assert status == 200, f"Expected HTTP status code 200, got {status}"
 
     expected_tree = {
         "type": "CATEGORY",
@@ -297,10 +297,10 @@ def test_twice_put_delete():
         sys.exit(1)
 
     status, _ = request("/delete/root2", "DELETE")
-    assert status == 200
+    assert status == 200, f"Expected HTTP status code 200, got {status}"
 
     status, tree = request("/delete/root1", "DELETE")
-    assert status == 200
+    assert status == 200, f"Expected HTTP status code 200, got {status}"
 
     print("Test twice put delete passed.")
 
@@ -328,18 +328,54 @@ def test_time_segments():
     status, _ = request("/imports", "POST", data=get_item_data("3", 1, 4))
     status, _ = request("/imports", "POST", data=get_item_data("4", 2, 5))
 
-    status, updated_items = request("/sales?date=2022-01-03T00:00:00.000Z", "GET", json_response=True)
+    status, updated_items = request(
+        "/sales?date=2022-01-03T00:00:00.000Z", "GET", json_response=True
+    )
 
-    expected_items = [{'date': 'Sun, 02 Jan 2022 01:00:00 GMT', 'id': '1', 'name': '1', 'parentId': None, 'price': 1,
-                       'type': 'OFFER'},
-                      {'date': 'Sun, 02 Jan 2022 02:00:00 GMT', 'id': '2', 'name': '2', 'parentId': None, 'price': 1,
-                       'type': 'OFFER'}]
+    expected_items = [
+        {
+            "date": "2022-01-02T01:00:00.000Z",
+            "id": "1",
+            "name": "1",
+            "parentId": None,
+            "price": 1,
+            "type": "OFFER",
+        },
+        {
+            "date": "2022-01-02T02:00:00.000Z",
+            "id": "2",
+            "name": "2",
+            "parentId": None,
+            "price": 1,
+            "type": "OFFER",
+        },
+    ]
+    assert sorted(expected_items, key=lambda x: x.items()) == sorted(updated_items, key=lambda x: x.items())
 
-    print(updated_items)
     request("/delete/1", "DELETE")
+
+    status, updated_items = request(
+        "/sales?date=2022-01-03T00:00:00.000Z", "GET", json_response=True
+    )
+
+    expected_items = [
+        {
+            "date": "2022-01-02T02:00:00.000Z",
+            "id": "2",
+            "name": "2",
+            "parentId": None,
+            "price": 1,
+            "type": "OFFER",
+        }
+    ]
+
+    assert sorted(expected_items, key=lambda x: x.items()) == sorted(updated_items, key=lambda x: x.items())
+
     request("/delete/2", "DELETE")
     request("/delete/3", "DELETE")
     request("/delete/4", "DELETE")
+
+    print("Test time segments passed")
 
 
 def test_all():

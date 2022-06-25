@@ -96,7 +96,6 @@ def test_check_id():
 
 def test_post():
     for index, batch in enumerate(IMPORT_BATCHES):
-        print(f"Importing batch {index}")
         status, _ = request("/imports", method="POST", data=batch)
 
         assert status == 200, f"Expected HTTP status code 200, got {status}"
@@ -110,6 +109,7 @@ def test_imports():
     test_check_price_3()
     test_check_time()
     test_check_id()
+    print("Test imports checks & validations passed.")
     test_post()
     print("Test imports passed.")
 
