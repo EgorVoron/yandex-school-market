@@ -32,7 +32,6 @@ item_checkers: List[Callable] = [check_item_fields, check_item_price]
 def validate_item(item: item_t) -> bool:
     for checker in item_checkers:
         if not checker(item):
-            print(f"failed {checker.__name__}")
             return False
     return True
 
@@ -69,7 +68,6 @@ def validate_items(items: List[item_t]) -> bool:
     if not check_items_id_list(id_list):
         return False
     if not check_items_parents(items, id2item):
-        print("failed parents check")
         return False
     return True
 
@@ -121,7 +119,6 @@ def post_shop_unit(item: item_t, update_date: datetime) -> bool:
     )
     if inserted_unit:
         if inserted_unit.type != item["type"]:
-            print("failed type comparison")
             return False
         update_shop_unit(item, update_date)
     else:
