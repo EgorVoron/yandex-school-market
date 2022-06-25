@@ -6,6 +6,10 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
+"""
+Inspired by the given unit_test.py
+"""
+
 API_BASEURL = "https://bali-1898.usr.yandex-academy.ru"
 
 ROOT_ID = "069cb8d7-bbdd-47d3-ad8f-82ef4c269df1"
@@ -209,7 +213,56 @@ def print_diff(expected, response):
     )
 
 
-def test_import():
+def test_check_fields():
+    status, _ = request("/imports", method="POST", data={"updateDate": "2022-02-03T15:00:00.000Z",
+                                                         "items": [{"type": "OFFER", "id": "b"}]})
+    assert status == 400
+
+
+def test_check_name():
+    status, _ = request("/imports", method="POST", data={"updateDate": "2022-02-03T15:00:00.000Z",
+                                                         "items": [{"type": "OFFER", "id": "b", "name": None}]})
+    assert status == 400
+
+
+def test_check_price_1():
+    status, _ = request("/imports", method="POST", data={"updateDate": "2022-02-03T15:00:00.000Z",
+                                                         "items": [{"type": "OFFER", "id": "b", "name": "a",
+                                                                    "price": None}]})
+    assert status == 400
+
+
+def test_check_price_2():
+    status, _ = request("/imports", method="POST", data={"updateDate": "2022-02-03T15:00:00.000Z",
+                                                         "items": [{"type": "OFFER", "id": "b", "name": "a",
+                                                                    "price": -2}]})
+    assert status == 400
+
+
+def test_check_price_3():
+    status, _ = request("/imports", method="POST", data={"updateDate": "2022-02-03T15:00:00.000Z",
+                                                         "items": [{"type": "CATEGORY", "id": "b", "name": "a",
+                                                                    "price": 3}]})
+    assert status == 400
+
+
+def test_check_time():
+    status, _ = request("/imports", method="POST", data={"updateDate": "2022-02-03 15:00:00.000",
+                                                         "items": [{"type": "CATEGORY", "id": "b", "name": "a",
+                                                                    "price": None}]})
+    assert status == 400
+
+
+def test_check_id():
+    status, _ = request("/imports", method="POST", data={"updateDate": "2022-02-03T15:00:00.000Z",
+                                                         "items": [{"type": "CATEGORY", "id": "b", "name": "a",
+                                                                    "price": None},
+                                                                   {"type": "CATEGORY", "id": "b", "name": "a",
+                                                                    "price": None}]})
+    assert status == 400
+
+
+def test_post():
     for index, batch in enumerate(IMPORT_BATCHES):
         print(f"Importing batch {index}")
         status, _ = request("/imports", method="POST", data=batch)
@@ -217,6 +270,17 @@ def test_import():
         assert status == 200, f"Expected HTTP status code 200, got {status}"
 
     print("Test import passed.")
+
+
+def test_imports():
+    test_check_fields()
+    test_check_name()
+    test_check_price_1()
+    test_check_price_2()
+    test_check_price_3()
+    test_check_time()
+    test_check_id()
+    test_post()
 
 
 def test_nodes():
@@ -246,7 +310,7 @@ def test_delete():
 
 
 def test_all():
-    test_import()
+    test_imports()
     test_nodes()
 
     test_delete()

@@ -22,7 +22,7 @@ def check_name(item: item_t) -> bool:
 
 
 def check_price(item: item_t) -> bool:
-    if not item.get("price"):
+    if "price" not in item.keys():
         return True
     if item["type"] == "CATEGORY":
         return item["price"] is None
