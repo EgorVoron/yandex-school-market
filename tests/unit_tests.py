@@ -347,10 +347,18 @@ def test_delete():
     print("Test delete passed.")
 
 
+def test_sales():
+    params = urllib.parse.urlencode({"date": "2022-02-04T00:00:00.000Z"})
+    status, response = request(f"/sales?{params}", json_response=True)
+    assert status == 200, f"Expected HTTP status code 200, got {status}"
+    print("Test sales passed.")
+
+
 def test_all():
     test_imports()
     test_nodes()
     test_delete()
+    test_sales()
 
 
 def main():
