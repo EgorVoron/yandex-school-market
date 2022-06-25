@@ -12,8 +12,10 @@ def unit_exists(unit_id: str) -> bool:
 
 
 def iso_to_datetime(dt_str: str) -> Union[bool, datetime]:
-    if not "T" in dt_str or not "Z" in dt_str:
-        return False  # 'datetime' module doesn't check if T or Z are in string, but raises error if they're wrongly placed
+    if not dt_str:
+        return False
+    if "T" not in dt_str or "Z" not in dt_str:
+        return False  # 'datetime' module doesn't check if T/Z are in string, but raises error if they're wrongly placed
     try:
         dt = datetime.fromisoformat(dt_str.replace("Z", "+00:00"))
     except ValueError:

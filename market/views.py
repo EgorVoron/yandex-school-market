@@ -35,7 +35,7 @@ def nodes(id):
 
 
 def sales():
-    date_to = iso_to_datetime(request.args.get("id"))
+    date_to = iso_to_datetime(request.args.get("date"))
     if not date_to:
         return validation_failed_response
     result: List[dict] = get_price_updated_units(date_to)
