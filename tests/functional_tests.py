@@ -359,6 +359,7 @@ def test_time_segments():
             "type": "OFFER",
         },
     ]
+    print(updated_items)
     assert sorted(expected_items, key=lambda x: x.items()) == sorted(
         updated_items, key=lambda x: x.items()
     )

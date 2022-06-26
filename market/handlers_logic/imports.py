@@ -138,6 +138,17 @@ def create_shop_unit(item: item_t, update_date: datetime) -> None:
     session.add(shop_unit)
 
 
+def log_price_update(item: item_t, update_date: datetime) -> None:
+    """
+    Adds info about offer's price update to db
+    """
+    try:
+        price_update_log = PriceUpdateLog(unit_id=item["id"], date=update_date)
+        session.add(price_update_log)
+    except:
+        session.rollback()
+
+
 def post_shop_unit(item: item_t, update_date: datetime) -> bool:
     inserted_unit = (
         session.query(ShopUnit).filter(ShopUnit.unit_id == item["id"]).first()
@@ -149,9 +160,7 @@ def post_shop_unit(item: item_t, update_date: datetime) -> bool:
     else:
         create_shop_unit(item, update_date)
     if item["type"] == "OFFER":
-        # add info about offer's price update to db
-        price_update_log = PriceUpdateLog(unit_id=item["id"], date=update_date)
-        session.add(price_update_log)
+        log_price_update(item, update_date)
     return True
 
 
