@@ -4,7 +4,7 @@ from typing import Any, Callable, Dict, List
 from market.db.schema import PriceUpdateLog, ShopUnit
 from market.db.sql_session import session
 
-required_fields = ["id", "name", "type", "price"]
+required_fields = ["id", "name", "type"]
 type_values = ["CATEGORY", "OFFER"]
 
 item_t = Dict[str, Any]
@@ -25,9 +25,9 @@ def check_item_price(item: item_t) -> bool:
     Checks if price value is correct
     """
     if item["type"] == "CATEGORY":
-        return item["price"] is None
+        return item.get("price") is None
     if item["type"] == "OFFER":
-        return isinstance(item["price"], int) and item["price"] >= 0
+        return "price" in item.keys() and isinstance(item["price"], int) and item["price"] >= 0
 
 
 item_checkers: List[Callable] = [check_item_fields, check_item_price]
