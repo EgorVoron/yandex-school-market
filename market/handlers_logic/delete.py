@@ -1,5 +1,7 @@
 from typing import List
 
+from sqlalchemy import exc
+
 from market.db.schema import PriceUpdateLog, ShopUnit
 from market.db.sql_session import session
 from market.handlers_logic.nodes import get_units_subtree
@@ -46,10 +48,12 @@ def remove_unit(unit_id: str) -> None:
             ShopUnit.date: get_update_time(unit_id),
         }
     )
-    session.commit()
 
     session.query(ShopUnit).where(ShopUnit.unit_id.in_(subtree_indices)).delete()
     session.query(PriceUpdateLog).where(
         PriceUpdateLog.unit_id.in_(subtree_indices)
     ).delete()
-    session.commit()
+    try:
+        session.commit()
+    except exc.SQLAlchemyError:
+        session.rollback()
