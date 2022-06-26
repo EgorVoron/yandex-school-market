@@ -4,7 +4,7 @@ from typing import Any, Callable, Dict, List
 from market.db.schema import PriceUpdateLog, ShopUnit
 from market.db.sql_session import session
 
-required_fields = ["id", "name", "type"]
+required_fields = ["id", "name", "type", "price"]
 type_values = ["CATEGORY", "OFFER"]
 
 item_t = Dict[str, Any]
@@ -24,8 +24,6 @@ def check_item_price(item: item_t) -> bool:
     """
     Checks if price value is correct
     """
-    if "price" not in item.keys():
-        return True
     if item["type"] == "CATEGORY":
         return item["price"] is None
     if item["type"] == "OFFER":
@@ -122,10 +120,6 @@ def update_shop_unit(item: item_t, update_date: datetime) -> None:
             ShopUnit.level: count_level(item),
         }
     )
-    if "price" not in item.keys():
-        return
-    price_update_log = PriceUpdateLog(unit_id=item["id"], date=update_date)
-    session.add(price_update_log)
 
 
 def create_shop_unit(item: item_t, update_date: datetime) -> None:
@@ -154,6 +148,10 @@ def post_shop_unit(item: item_t, update_date: datetime) -> bool:
         update_shop_unit(item, update_date)
     else:
         create_shop_unit(item, update_date)
+    if item["type"] == "OFFER":
+        # add info about offer's price update to db
+        price_update_log = PriceUpdateLog(unit_id=item["id"], date=update_date)
+        session.add(price_update_log)
     return True
 
 
