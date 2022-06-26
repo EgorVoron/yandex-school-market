@@ -350,6 +350,14 @@ def test_time_segments():
             "price": 1,
             "type": "OFFER",
         },
+        {
+            "date": "2022-01-02T05:00:00.000Z",
+            "id": "4",
+            "name": "4",
+            "parentId": None,
+            "price": 1,
+            "type": "OFFER",
+        },
     ]
     assert sorted(expected_items, key=lambda x: x.items()) == sorted(
         updated_items, key=lambda x: x.items()
@@ -369,7 +377,15 @@ def test_time_segments():
             "parentId": None,
             "price": 1,
             "type": "OFFER",
-        }
+        },
+        {
+            "date": "2022-01-02T05:00:00.000Z",
+            "id": "4",
+            "name": "4",
+            "parentId": None,
+            "price": 1,
+            "type": "OFFER",
+        },
     ]
 
     assert sorted(expected_items, key=lambda x: x.items()) == sorted(

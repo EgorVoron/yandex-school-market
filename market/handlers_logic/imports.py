@@ -1,6 +1,8 @@
 from datetime import datetime
 from typing import Any, Callable, Dict, List
 
+from sqlalchemy import exc
+
 from market.db.schema import PriceUpdateLog, ShopUnit
 from market.db.sql_session import session
 
@@ -24,12 +26,14 @@ def check_item_price(item: item_t) -> bool:
     """
     Checks if price value is correct
     """
-    if "price" not in item.keys():
-        return True
     if item["type"] == "CATEGORY":
-        return item["price"] is None
+        return item.get("price") is None
     if item["type"] == "OFFER":
-        return isinstance(item["price"], int) and item["price"] >= 0
+        return (
+            "price" in item.keys()
+            and isinstance(item["price"], int)
+            and item["price"] >= 0
+        )
 
 
 item_checkers: List[Callable] = [check_item_fields, check_item_price]
@@ -122,10 +126,6 @@ def update_shop_unit(item: item_t, update_date: datetime) -> None:
             ShopUnit.level: count_level(item),
         }
     )
-    if "price" not in item.keys():
-        return
-    price_update_log = PriceUpdateLog(unit_id=item["id"], date=update_date)
-    session.add(price_update_log)
 
 
 def create_shop_unit(item: item_t, update_date: datetime) -> None:
@@ -144,6 +144,14 @@ def create_shop_unit(item: item_t, update_date: datetime) -> None:
     session.add(shop_unit)
 
 
+def log_price_update(item: item_t, update_date: datetime) -> None:
+    """
+    Adds info about offer's price update to db
+    """
+    price_update_log = PriceUpdateLog(unit_id=item["id"], date=update_date)
+    session.add(price_update_log)
+
+
 def post_shop_unit(item: item_t, update_date: datetime) -> bool:
     inserted_unit = (
         session.query(ShopUnit).filter(ShopUnit.unit_id == item["id"]).first()
@@ -154,6 +162,8 @@ def post_shop_unit(item: item_t, update_date: datetime) -> bool:
         update_shop_unit(item, update_date)
     else:
         create_shop_unit(item, update_date)
+    if item["type"] == "OFFER":
+        log_price_update(item, update_date)
     return True
 
 
@@ -169,5 +179,8 @@ def post_shop_units(items: List[item_t], update_date: datetime) -> bool:
         if not result:
             session.rollback()
             return False
-    session.commit()
+    try:
+        session.commit()
+    except exc.SQLAlchemyError:
+        session.rollback()
     return True
