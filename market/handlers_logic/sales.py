@@ -23,7 +23,8 @@ def get_price_updated_units_tuples(date_to: datetime) -> List[tuple]:
             ShopUnit.type,
             ShopUnit.price,
             ShopUnit.date,
-        ).distinct()
+        )
+        .distinct()
         .all()
     )
 
